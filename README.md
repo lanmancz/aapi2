@@ -15,5 +15,6 @@ Copy "aapi2.lua" file into "[X-Plane 11]\Resources\plugins\FlyWithLua\Modules\"
  	- Added events for windows (mandatory property)
  	- Added basic window focus control
  	- Fixed minor graphical bugs introduced FLWNG
+	
 *v2.04:
 	- Added "font" property for labels (std, h10, h12, h18)
