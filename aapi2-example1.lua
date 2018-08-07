@@ -1,3 +1,4 @@
+require("aapi2")
 local i = nil	-- Instance handle
 local w = nil	-- Window handle
 
