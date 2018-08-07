@@ -40,7 +40,7 @@ local _p = {
 	}		
 }
 -- Register new window in our aapi2 instance (i) and grab the handle (w)
-w = aapi2.CreateWindow(i, _p)
+local w = aapi2.CreateWindow(i, _p)
 -- ------------------------------------------------------------------------------------------------
 -- Create label object
 local _p = {
