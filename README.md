@@ -10,11 +10,13 @@ Installation:
 Copy "aapi2.lua" file into "[X-Plane 11]\Resources\plugins\FlyWithLua\Modules\"
 
 *v2.03:
-  - Added "table" object
-  - Added "editbox" object
-  - Added events for windows (mandatory property)
-  - Added basic window focus control
-  - Fixed minor graphical bugs introduced FLWNG
+ 	- Added "table" object
+ 	- Added "editbox" object
+ 	- Added events for windows (mandatory property)
+ 	- Added basic window focus control
+ 	- Fixed minor graphical bugs introduced FLWNG
+*v2.04:
+	- Added "font" property for labels (std, h10, h12, h18)
 
 ---------------------------------------------------------------------------------------------------------------------------
 Object prototypes:
@@ -54,7 +56,8 @@ Object prototypes:
   ["name"] = "Label1",
   ["x"] = 10, ["y"] = 10,
   ["color"] = { ["r"]=1, ["g"]=1, ["b"]=1 },
-  ["text"] = "Label1"
+  ["text"] = "Label1",
+  ["font"] = "std", -- std, h10, h12, h18
 ---------------------------------------------------------------------------------------------------------------------------
 - box:
   ["type"] = "box",
