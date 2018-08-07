@@ -9,6 +9,9 @@
 	This software comes with no warranty - use at your own risk!
 	More information in documentation.
 
+	*v2.04:
+		- Added "font" property for labels (std, h10, h12, h18)
+	
 	*v2.03:
 		- Added "table" object
 		- Added "editbox" object
@@ -26,7 +29,7 @@ require("graphics")
 -- LOCAL VARIABLES
 local AceAPI = {}
 AceAPI = {
-	["version"] = "2.03",
+	["version"] = "2.04",
 	["config"] = {
 		["debug"] = false,
 	},
@@ -47,6 +50,7 @@ function CreateInstance(name)
 	AceAPI["inst"][_handle] = {
 		["name"] = _name,
 		["win"] = {},
+		["dialog"] = {},
 		["runtime"] = {},
 	}
 	return _handle
@@ -221,9 +225,23 @@ local function llDrawLine(x1, y1, x2, y2, w, r, g, b, a)
 end 
 -- ------------------------------------------------------------------------------------------------
 -- Low level draw text function
-local function llDrawText(x, y, r, g, b, text)
+local function llDrawText(x, y, r, g, b, text, font)
 	if text == nil then return end
-	draw_string(x, Ay2Oy(y), tostring(text), r, g, b)
+	if font == nil then font = "std" end
+	
+	if (font == "std") then
+		draw_string(x, Ay2Oy(y), tostring(text), r, g, b)
+	elseif (font == "h10") then
+		glColor4f(r, g, b, 1)
+		draw_string_Helvetica_10(x, Ay2Oy(y), tostring(text))
+	elseif (font == "h12") then
+		glColor4f(r, g, b, 1)
+		draw_string_Helvetica_12(x, Ay2Oy(y), tostring(text))
+	elseif (font == "h18") then
+		glColor4f(r, g, b, 1)
+		draw_string_Helvetica_18(x, Ay2Oy(y), tostring(text))
+	end
+
 end
 -- ------------------------------------------------------------------------------------------------
 -- Low level draw box function (rectangle with line borders)
@@ -432,16 +450,29 @@ local function DrawComponent(i, w, c)
 		}
 		llDrawBox(_t["x"], _t["y"], _t["w"], _t["h"], _t["br"], _t["bg"], _t["bb"], _t["ba"], _t["fr"], _t["fg"], _t["fb"], _t["fa"], _t["bw"])
 	-- label
-	elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "label") then	
-		local _t = {
-			["x"] = _rx + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["x"],
-			["y"] = _ry + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["y"],
-			["r"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["r"],
-			["g"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["g"],
-			["b"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["b"],
-			["t"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["text"]
-		}
-		llDrawText(_t["x"], _t["y"], _t["r"], _t["g"], _t["b"], _t["t"])
+	elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "label") then
+		if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"] == nil) or (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"] == "std") then
+			local _t = {
+				["x"] = _rx + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["x"],
+				["y"] = _ry + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["y"],
+				["r"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["r"],
+				["g"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["g"],
+				["b"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["b"],
+				["t"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["text"]
+			}
+			llDrawText(_t["x"], _t["y"], _t["r"], _t["g"], _t["b"], _t["t"])
+		elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"] == nil) or (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"] ~= "std") then	
+			local _t = {
+				["x"] = _rx + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["x"],
+				["y"] = _ry + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["y"],
+				["r"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["r"],
+				["g"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["g"],
+				["b"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["b"],
+				["t"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["text"],
+				["f"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"]
+			}
+			llDrawText(_t["x"], _t["y"], _t["r"], _t["g"], _t["b"], _t["t"], _t["f"])
+		end
 	-- box
 	elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "box") then	
 		local _s = "bg"
@@ -1788,4 +1819,3 @@ function Main()
 	return
 end
 do_every_draw("aapi2.Main()")
-
