@@ -9,15 +9,16 @@
 	This software comes with no warranty - use at your own risk!
 	More information in documentation.
 
-	*v2.04:
-		- Added "font" property for labels (std, h10, h12, h18)
-	
 	*v2.03:
 		- Added "table" object
 		- Added "editbox" object
 		- Added events for windows (mandatory property)
 		- Added basic window focus control
 		- Fixed minor graphical bugs introduced FLWNG
+	*v2.04:
+		- Added "font" property for labels (std, h10, h12, h18)
+	*v2.05:
+		- Fixed window focus bug
 --]]
 -- ************************************************************************************************************************************************************************************************
 -- GLOBAL INIT
@@ -29,9 +30,9 @@ require("graphics")
 -- LOCAL VARIABLES
 local AceAPI = {}
 AceAPI = {
-	["version"] = "2.04",
+	["version"] = "2.05",
 	["config"] = {
-		["debug"] = false,
+		["debug"] = true,
 	},
 	["inst"] = {},
 	["focus"] = {
@@ -1179,7 +1180,7 @@ local function WindowClick(i,w)
 					-- Click inside component
 					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
 						if (_ms == "down") then
-							SetFocus(i, w, c)
+							if (_ms == "down") then SetFocus(i, w, c) end
 							-- Flip the switch
 							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["mode"] == "switch") then
 								if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["state"] == "off") then
@@ -1204,7 +1205,7 @@ local function WindowClick(i,w)
 					-- Click inside component
 					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
 						if (_ms == "down") then
-							SetFocus(i, w, c)						
+							if (_ms == "down") then SetFocus(i, w, c) end						
 							-- Call the events
 							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_click"] ~= nil) and (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_click"] ~= "") then
 								_G[AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_click"]](i,w,c)
@@ -1220,7 +1221,7 @@ local function WindowClick(i,w)
 					-- Click inside component
 					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
 						if (_ms == "down") then
-							SetFocus(i, w, c)						
+							if (_ms == "down") then SetFocus(i, w, c) end					
 							-- Flip the led
 							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["control"]["enabled"] == true) then
 								if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["state"] == "off") then
@@ -1244,7 +1245,7 @@ local function WindowClick(i,w)
 					local _ch = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["h"]
 					-- Click inside component
 					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
-						SetFocus(i, w, c)
+						if (_ms == "down") then SetFocus(i, w, c) end
 						-- Select row
 						local _hy = 0
 						if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["header"]["enabled"] == true) then
@@ -1365,7 +1366,7 @@ local function WindowClick(i,w)
 					local _bs = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["control"]["buttons"]["size"]
 					-- Click inside component
 					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
-						SetFocus(i, w, c)
+						if (_ms == "down") then SetFocus(i, w, c) end
 						-- Slider position
 						local _min = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["min"]
 						local _max = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["max"]
@@ -1490,7 +1491,7 @@ local function WindowClick(i,w)
 
 		-- Window close button
 		elseif (_mx >= ((_x+_w)-_hh)) and (_my >= (_y-_hh)) and (_mx <= (_x + _w)) and (_my <= _y) then
-			SetFocus(i, w)
+			if (_ms == "down") then SetFocus(i, w, c) end
 			if (AceAPI["inst"][i]["win"][w]["header"]["enabled"] == true) then
 				if (_ms == "down") then
 					if (AceAPI["inst"][i]["win"][w]["header"]["close"] == true) then
@@ -1658,7 +1659,7 @@ local function WindowWheel(i,w)
 				end
 			end
 			-- We hit inside a window but not on a component, resume mouse wheel
-			SetFocus(i, w)
+			SetFocus(i, w, nil)
 			return true
 		end			
 	end
