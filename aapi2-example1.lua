@@ -359,7 +359,7 @@ local _p = {
 		["color"] = { ["r"]=0.98, ["g"]=0.99, ["b"]=1.0, ["a"]=0.9 }
 	},
 	["events"] = {
-		["on_click"] = "",
+		["on_click"] = "ExampleTableCallback",
 		["on_wheel"] = "",
 		["on_drag"] = ""
 	},
@@ -420,6 +420,18 @@ local _p = {
 }
 aapi2.CreateComponent(i, w, _p)
 -- ------------------------------------------------------------------------------------------------
+-- Create label object
+local _p = {
+	["type"] = "label",
+	["name"] = "Label6",
+	["x"] = 270, ["y"] = 345,
+	["color"] = { ["r"]=1, ["g"]=1, ["b"]=1 },
+	["text"] = "Selected row: ",
+	["font"] = "std",	-- std, h10, h12, h18
+}
+-- Register new component in aapi2
+aapi2.CreateComponent(i, w, _p)
+-- ------------------------------------------------------------------------------------------------
 -- Example of an event callback function
 function ExampleButtonCallback(i, w, c)
 	-- First we need to find handles of components we want to interact with
@@ -453,4 +465,20 @@ function ExampleSliderCallback(i, w, c)
 	-- And that's it
 	return
 end
-
+-- ------------------------------------------------------------------------------------------------
+-- Another example of an event callback function
+function ExampleTableCallback(i, w, c)
+	-- First we need to find handles of components we want to interact with
+	local _th = aapi2.GetComponentHandle(i, w, "Table1")
+	local _lh = aapi2.GetComponentHandle(i, w, "Label6")
+	
+	-- Next we need to grab their properties
+	local _tp = aapi2.GetComponentProperties(i, w, _th)
+	local _lp = aapi2.GetComponentProperties(i, w, _lh)
+	
+	-- Now we can use property of one to affect property of the other
+	_lp["text"] = "Selected row: ".._tp["table"]["selection"]["row"]
+	
+	-- And that's it
+	return
+end
