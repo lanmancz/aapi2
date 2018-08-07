@@ -32,7 +32,7 @@ local AceAPI = {}
 AceAPI = {
 	["version"] = "2.05",
 	["config"] = {
-		["debug"] = true,
+		["debug"] = false,
 	},
 	["inst"] = {},
 	["focus"] = {
