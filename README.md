@@ -19,3 +19,6 @@ Copy "aapi2.lua" file into "[X-Plane 11]\Resources\plugins\FlyWithLua\Modules\"
 	
 **v2.04:**
 - Added "font" property for labels (std, h10, h12, h18)
+
+**v2.05:**
+- Fixed window focus bug
