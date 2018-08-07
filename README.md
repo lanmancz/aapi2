@@ -9,16 +9,3 @@ This software comes with no warranty - use at your own risk!
 
 **Installation:**
 Copy "aapi2.lua" file into "[X-Plane 11]\Resources\plugins\FlyWithLua\Modules\"
-
-**v2.03:**
- - Added "table" object
- - Added "editbox" object
- - Added events for windows (mandatory property)
- - Added basic window focus control
- - Fixed minor graphical bugs introduced FLWNG
-	
-**v2.04:**
-- Added "font" property for labels (std, h10, h12, h18)
-
-**v2.05:**
-- Fixed window focus bug
