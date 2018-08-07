@@ -3,7 +3,7 @@ local i = nil	-- Instance handle
 local w = nil	-- Window handle
 
 -- Create AceAPI instance
-i = aapi2.CreateInstance("ExampleInstance")
+local i = aapi2.CreateInstance("ExampleInstance")
 
 local _ex_win_width = 800	-- Example window width
 local _ex_win_height = 600	-- Example window height
