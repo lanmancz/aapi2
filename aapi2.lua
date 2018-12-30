@@ -19,6 +19,10 @@
 		- Added "font" property for labels (std, h10, h12, h18)
 	*v2.05:
 		- Fixed window focus bug
+	*v2.06:
+		- Added "readout" object
+		- Added "SetComponentValue" and "GetComponentValue" functions+
+		- Fixed progress bar mouse wheel control bug
 --]]
 -- ************************************************************************************************************************************************************************************************
 -- GLOBAL INIT
@@ -30,7 +34,7 @@ require("graphics")
 -- LOCAL VARIABLES
 local AceAPI = {}
 AceAPI = {
-	["version"] = "2.05",
+	["version"] = "2.06",
 	["config"] = {
 		["debug"] = false,
 	},
@@ -41,6 +45,16 @@ AceAPI = {
 		["component"] = nil,
 	},
 }
+-- ************************************************************************************************************************************************************************************************
+-- LOCAL UTILITY FUNCTIONS
+-- Output a text message into main X-Plane log
+local function Log(text) logMsg("AceAPI: "..text) end
+-- Output a debug text message into main X-Plane log if debug mode is on
+local function DebugLog(text) return end --if AceAPI["config"]["debug"] == true then logMsg("AceAPI DEBUG: "..text) end end
+-- Return inverted Y coordinate - X-Plane is addressing the Y coordinates from bottom of the screen
+local function Ay2Oy(ay) return (SCREEN_HIGHT - ay) end
+-- Return true if pattern is found in the string
+local function TestPat(s,p) if s:find(p) ~= nil then return true else return false end end
 
 -- ************************************************************************************************************************************************************************************************
 -- GLOBAL FUNCTIONS
@@ -54,6 +68,7 @@ function CreateInstance(name)
 		["dialog"] = {},
 		["runtime"] = {},
 	}
+	DebugLog("Created new instance. Instance: ".._handle..", Name: "..AceAPI["inst"][_handle]["name"]..", Version: "..AceAPI["version"])
 	return _handle
 end
 
@@ -75,17 +90,6 @@ function Round(n, d)
   local m = 10^(d or 0)
   return math.floor(n * m + 0.5) / m
 end
-
--- ************************************************************************************************************************************************************************************************
--- LOCAL FUNCTIONS
--- Output a text message into main X-Plane log
-local function Log(text) logMsg("AceAPI: "..text) end
--- Output a debug text message into main X-Plane log if debug mode is on
-local function DebugLog(text) if AceAPI["config"]["debug"] == true then logMsg("AceAPI DEBUG: "..text) end end
--- Return inverted Y coordinate - X-Plane is addressing the Y coordinates from bottom of the screen
-local function Ay2Oy(ay) return (SCREEN_HIGHT - ay) end
--- Return true if pattern is found in the string
-local function TestPat(s,p) if s:find(p) ~= nil then return true else return false end end
 
 -- ************************************************************************************************************************************************************************************************
 -- GLOBAL WINDOW FUNCTIONS
@@ -204,6 +208,42 @@ end
 function SetComponentProperties(instance, window, component, properties)
 	_properties = properties or nil
 	AceAPI["inst"][instance]["win"][window]["body"]["components"][component] = _properties
+	return
+end
+
+-- ------------------------------------------------------------------------------------------------
+
+function GetComponentValue(instance, window, component, name)
+	if name == "" or name == nil then return nil end
+
+	_properties = AceAPI["inst"][instance]["win"][window]["body"]["components"][component] or nil
+	if _properties == nil then return nil end
+
+	if _properties[name] ~= nil then
+		return _properties[name]
+	else
+		return nil
+	end
+
+	return nil
+end
+
+-- ------------------------------------------------------------------------------------------------
+
+function SetComponentValue(instance, window, component, name, value)
+	if name == "" or name == nil then return end
+	if value == nil then return end
+
+	_properties = AceAPI["inst"][instance]["win"][window]["body"]["components"][component] or nil
+	if _properties == nil then return end
+
+	if _properties[name] ~= nil then
+		_properties[name] = value
+		AceAPI["inst"][instance]["win"][window]["body"]["components"][component] = _properties
+	else
+		return
+	end
+
 	return
 end
 
@@ -473,6 +513,37 @@ local function DrawComponent(i, w, c)
 				["f"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["font"]
 			}
 			llDrawText(_t["x"], _t["y"], _t["r"], _t["g"], _t["b"], _t["t"], _t["f"])
+		end
+	-- readout
+	elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "readout") then
+		local _t = {
+			["x"] = _rx + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["x"],
+			["y"] = _ry + AceAPI["inst"][i]["win"][w]["body"]["components"][c]["y"],
+			["r"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["r"],
+			["g"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["g"],
+			["b"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["color"]["b"],
+			["t"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["text"],
+			["s"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["sep"],
+			["v"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["value"],
+			["u"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["units"]
+		}
+		llDrawText(_t["x"], _t["y"], _t["r"], _t["g"], _t["b"], _t["t"])
+		
+		local _tx = measure_string(_t["t"])
+		llDrawText(_t["x"]+_tx, _t["y"], _t["r"], _t["g"], _t["b"], _t["s"])
+
+		if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["column"] ~= nil) and (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["column"] > 0) then
+			_tx = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["column"] + measure_string(_t["s"].." ")
+			llDrawText(_t["x"]+_tx, _t["y"], _t["r"], _t["g"], _t["b"], _t["v"])
+
+			_tx = _tx + measure_string(_t["v"].." ")
+			llDrawText(_t["x"]+_tx, _t["y"], _t["r"], _t["g"], _t["b"], _t["u"])
+		else
+			_tx = _tx + measure_string(_t["s"].." ")
+			llDrawText(_t["x"]+_tx, _t["y"], _t["r"], _t["g"], _t["b"], _t["v"])
+
+			_tx = _tx + measure_string(_t["v"].." ")
+			llDrawText(_t["x"]+_tx, _t["y"], _t["r"], _t["g"], _t["b"], _t["u"])
 		end
 	-- box
 	elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "box") then	
@@ -1633,28 +1704,30 @@ local function WindowWheel(i,w)
 						--DebugLog("Start: "..AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["display"]["start"].." Rows: "..#AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["rows"].." Display: "..Round(((AceAPI["inst"][i]["win"][w]["body"]["components"][c]["h"]-_hy)/AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["row_height"]),0))
 					end
 				elseif (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["type"] == "progress_bar") then
-					local _cw = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["w"]
-					local _ch = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["h"]
-					-- Click inside component
-					if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
-						SetFocus(i, w, c)
-						AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] + (MOUSE_WHEEL_CLICKS * AceAPI["inst"][i]["win"][w]["body"]["components"][c]["control"]["delta_wheel"])
-						-- Don't go below min
-						if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] < AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["min"]) then
-							AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["min"]
-						end					
-						-- Don't go above max
-						if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] > AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["max"]) then
-							AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["max"]
-						end							
+					if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["control"]["enabled"] == true) then
+						local _cw = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["w"]
+						local _ch = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["h"]
+						-- Click inside component
+						if (_mx >= _cx) and (_my >= _cy) and (_mx <= (_cx+_cw)) and (_my <= (_cy+_ch)) then
+							SetFocus(i, w, c)
+							AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] + (MOUSE_WHEEL_CLICKS * AceAPI["inst"][i]["win"][w]["body"]["components"][c]["control"]["delta_wheel"])
+							-- Don't go below min
+							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] < AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["min"]) then
+								AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["min"]
+							end					
+							-- Don't go above max
+							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] > AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["max"]) then
+								AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"] = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["max"]
+							end							
 
-						-- Call the events
-						if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"] ~= nil) and (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"] ~= "") then
-							_G[AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"]](i,w,c)
-						end									
+							-- Call the events
+							if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"] ~= nil) and (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"] ~= "") then
+								_G[AceAPI["inst"][i]["win"][w]["body"]["components"][c]["events"]["on_wheel"]](i,w,c)
+							end									
 
-						DebugLog("MouseWheel (COMPONENT): Instance: "..i..", Window: "..w..", Component: "..c..", Name: "..AceAPI["inst"][i]["win"][w]["body"]["components"][c]["name"]..", Value: "..AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"])
-						return true
+							DebugLog("MouseWheel (COMPONENT): Instance: "..i..", Window: "..w..", Component: "..c..", Name: "..AceAPI["inst"][i]["win"][w]["body"]["components"][c]["name"]..", Value: "..AceAPI["inst"][i]["win"][w]["body"]["components"][c]["bar"]["pos"])
+							return true
+						end
 					end
 				end
 			end
