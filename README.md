@@ -10,4 +10,4 @@ This software comes with no warranty - use at your own risk!
 **Installation:**
 Copy "aapi2.lua" file into "[X-Plane 11]\Resources\plugins\FlyWithLua\Modules\"
 
-**Current version: 2.05** 
+**Current version: 2.06** 
