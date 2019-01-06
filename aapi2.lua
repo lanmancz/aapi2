@@ -23,6 +23,8 @@
 		- Added "readout" object
 		- Added "SetComponentValue" and "GetComponentValue" functions+
 		- Fixed progress bar mouse wheel control bug
+	v2.07:
+		- Added ["table"]["selection"]["control"] property for tables
 --]]
 -- ************************************************************************************************************************************************************************************************
 -- GLOBAL INIT
@@ -34,7 +36,7 @@ require("graphics")
 -- LOCAL VARIABLES
 local AceAPI = {}
 AceAPI = {
-	["version"] = "2.06",
+	["version"] = "2.07",
 	["config"] = {
 		["debug"] = false,
 	},
@@ -1346,10 +1348,14 @@ local function WindowClick(i,w)
 						-- Click on row
 						if (_mx >= (_cx+1)) and (_my >= (_cy+_hy+1)) and (_mx <= (_cx+_cw-_sx-1)) and (_my <= (_cy+_ch)) then
 							if (_ms == "down") then
-								local _last = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"]
-								AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] = _row_start + math.ceil(((_my - (_cy+_hy))/_row_height)) - 1
-								if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] < 1) or (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] > _row_count) then
-									AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] = _last
+								if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["control"] ~= nil) and (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["control"] == false) then
+									-- Do nothing
+								else
+									local _last = AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"]
+									AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] = _row_start + math.ceil(((_my - (_cy+_hy))/_row_height)) - 1
+									if (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] < 1) or (AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] > _row_count) then
+										AceAPI["inst"][i]["win"][w]["body"]["components"][c]["table"]["selection"]["row"] = _last
+									end
 								end
 							end
 						end
